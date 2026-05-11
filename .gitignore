@@ -15,5 +15,6 @@ wiki/
 .openkb/
 
 # Local only
-docs/
+docs/*
+!docs/visualkb-session-origin.html
 .claude/

@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisualKB Session Origin</title>
+  <style>
+    :root {
+      --bg: #f7f5ef;
+      --panel: #fffdf8;
+      --ink: #151515;
+      --muted: #64615b;
+      --line: rgba(21, 21, 21, .16);
+      --line-strong: rgba(21, 21, 21, .28);
+      --blue: #2468d8;
+      --green: #188f65;
+      --amber: #b97912;
+      --violet: #7654c7;
+      --code: #111319;
+      --shadow: 0 24px 70px rgba(31, 29, 24, .12);
+      font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(21, 21, 21, .035) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(21, 21, 21, .035) 1px, transparent 1px),
+        radial-gradient(circle at 12% 12%, rgba(36, 104, 216, .11), transparent 28rem),
+        radial-gradient(circle at 90% 16%, rgba(24, 143, 101, .1), transparent 24rem),
+        var(--bg);
+      background-size: 36px 36px, 36px 36px, auto, auto, auto;
+      line-height: 1.64;
+    }
+
+    a {
+      color: var(--blue);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      width: min(1240px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 58px 0 38px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      margin-bottom: 18px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.05;
+      letter-spacing: -.03em;
+    }
+
+    h1 {
+      max-width: 920px;
+      font-size: clamp(44px, 7vw, 96px);
+    }
+
+    h2 {
+      font-size: clamp(30px, 4vw, 56px);
+    }
+
+    h3 {
+      font-size: 24px;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .tldr {
+      max-width: 900px;
+      margin-top: 22px;
+      color: #34312d;
+      font-size: clamp(18px, 1.6vw, 23px);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: #4a4640;
+      background: rgba(255, 253, 248, .72);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    section {
+      padding: 48px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+      gap: 30px;
+      align-items: start;
+      margin-bottom: 24px;
+    }
+
+    .section-copy {
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: rgba(255, 253, 248, .75);
+    }
+
+    .card b {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 18px;
+    }
+
+    .card p,
+    .muted {
+      color: var(--muted);
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .panel {
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: rgba(255, 253, 248, .82);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .panel header {
+      padding: 15px 18px;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .panel ul {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 18px 24px 22px 36px;
+      color: #4f4c47;
+    }
+
+    .panel li::marker {
+      color: var(--blue);
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      counter-reset: step;
+    }
+
+    .step {
+      min-height: 190px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 16px;
+      background: rgba(255, 253, 248, .82);
+      counter-increment: step;
+    }
+
+    .step::before {
+      content: counter(step, decimal-leading-zero);
+      display: block;
+      margin-bottom: 18px;
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .12em;
+    }
+
+    .step b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 17px;
+    }
+
+    .step p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .path-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .path {
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(255, 253, 248, .75);
+    }
+
+    code,
+    pre {
+      font-family: "Cascadia Mono", "Consolas", monospace;
+    }
+
+    code {
+      color: #1c4f9f;
+      font-size: .95em;
+    }
+
+    pre {
+      overflow: auto;
+      margin: 0;
+      border-radius: 8px;
+      padding: 18px;
+      color: #f4eee7;
+      background: var(--code);
+      font-size: 13px;
+      line-height: 1.58;
+      white-space: pre-wrap;
+    }
+
+    .source-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .source-strip a,
+    .source-strip span {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(255, 253, 248, .75);
+      font-size: 13px;
+    }
+
+    footer {
+      padding: 30px 0 48px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1000px) {
+      .section-head,
+      .compare {
+        grid-template-columns: 1fr;
+      }
+
+      .grid,
+      .timeline {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .shell {
+        width: min(100% - 24px, 1240px);
+      }
+
+      .grid,
+      .timeline {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <div class="eyebrow">VisualKB / Session Origin / 2026-05-11</div>
+      <h1>Why VisualKB exists, and how this fork should evolve.</h1>
+      <p class="tldr">VisualKB was defined in this session as an OpenKB-derived product direction: keep the LLM Wiki idea, but move the primary knowledge artifact from Markdown pages to renderable, inspectable, source-linked HTML Knowledge Objects.</p>
+      <div class="meta" aria-label="Document metadata">
+        <span class="pill">Product: VisualKB</span>
+        <span class="pill">Category: LLM Wiki with HTML</span>
+        <span class="pill">Artifact: HTML Knowledge Object</span>
+        <span class="pill">Fork: songblaq/VisualKB</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="shell section-head">
+        <div>
+          <h2>TL;DR</h2>
+        </div>
+        <p class="section-copy">Markdown is an excellent text format, but a knowledge base that contains charts, tables, timelines, images, code maps, citations, and visual comparisons should not collapse everything into prose. VisualKB keeps source material and LLM-compiled wiki behavior, while adding HTML as the first-class medium for understanding.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <h2>Why</h2>
+          </div>
+          <p class="section-copy">The session started from a product observation: Karpathy's LLM Wiki pattern and OpenKB point in the right direction, but their default artifact is still Markdown. As AI vision and browser understanding improve, an LLM should be able to read not only text, but also the rendered structure of a knowledge page.</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <b>Markdown is text-first</b>
+            <p>It works well for headings, prose, lists, code, and links. It is weaker when the knowledge is inherently visual or relational.</p>
+          </article>
+          <article class="card">
+            <b>Knowledge is often visual</b>
+            <p>Model comparisons, evaluation charts, timelines, diagrams, source relationships, and image annotations are clearer as visual structures.</p>
+          </article>
+          <article class="card">
+            <b>LLMs can read screens</b>
+            <p>If models can understand images and browser-rendered HTML, the rendered view can become part of the knowledge representation.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <h2>What</h2>
+          </div>
+          <p class="section-copy">VisualKB is not just an HTML export option. It is a product layer where the compiled wiki produces HTML Knowledge Objects: pages or component bundles that preserve text, visual layout, data, source links, accessibility labels, and optional screenshots.</p>
+        </div>
+        <div class="compare">
+          <article class="panel">
+            <header>OpenKB baseline</header>
+            <ul>
+              <li>Ingest raw documents into a compiled LLM-maintained wiki.</li>
+              <li>Use Markdown pages and wikilinks as the durable output.</li>
+              <li>Keep compatibility with Obsidian and text-first workflows.</li>
+              <li>Support multimodal source understanding during ingestion.</li>
+            </ul>
+          </article>
+          <article class="panel">
+            <header>VisualKB direction</header>
+            <ul>
+              <li>Keep source preservation and compiled wiki behavior.</li>
+              <li>Add HTML Knowledge Objects as a primary output target.</li>
+              <li>Represent knowledge as charts, matrices, timelines, diagrams, cards, and source strips.</li>
+              <li>Let humans and LLMs inspect the same rendered knowledge object.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <h2>How We Got Here</h2>
+          </div>
+          <p class="section-copy">This is the concrete path taken in the session, so future work can recover the origin instead of rediscovering the same decisions.</p>
+        </div>
+        <div class="timeline">
+          <article class="step">
+            <b>Started with LLM Wiki</b>
+            <p>Reviewed Karpathy's LLM Wiki idea: raw sources are compiled into an LLM-maintained wiki rather than re-derived on every query.</p>
+          </article>
+          <article class="step">
+            <b>Compared OpenKB</b>
+            <p>Identified OpenKB as a productized open-source implementation that still centers Markdown/Obsidian-compatible outputs.</p>
+          </article>
+          <article class="step">
+            <b>Named the product</b>
+            <p>Chose VisualKB as the product name, with "LLM Wiki with HTML" as the category phrase.</p>
+          </article>
+          <article class="step">
+            <b>Created Codex skills</b>
+            <p>Defined two local skills: one for capturing sources into VisualKB, one for writing standalone HTML documentation.</p>
+          </article>
+          <article class="step">
+            <b>Forked OpenKB</b>
+            <p>Authenticated GitHub as songblaq, forked VectifyAI/OpenKB to songblaq/VisualKB, and cloned it locally for product work.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <h2>Decisions</h2>
+          </div>
+          <p class="section-copy">These decisions should be treated as current product intent until deliberately revised.</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <b>Product name</b>
+            <p><code>VisualKB</code>. It compares cleanly with OpenKB while emphasizing visual knowledge representation.</p>
+          </article>
+          <article class="card">
+            <b>Category</b>
+            <p><code>LLM Wiki with HTML</code>. This explains the lineage from LLM Wiki and the shift from Markdown to HTML.</p>
+          </article>
+          <article class="card">
+            <b>Core artifact</b>
+            <p><code>HTML Knowledge Object</code>. A renderable, inspectable, source-linked HTML document or component bundle.</p>
+          </article>
+          <article class="card">
+            <b>Core verb</b>
+            <p><code>Visualize HTML</code>. Turn knowledge into visual HTML structures instead of long prose only.</p>
+          </article>
+          <article class="card">
+            <b>CLI/package direction</b>
+            <p><code>visualkb</code>. Future commands can mirror OpenKB while adding HTML targets and validation.</p>
+          </article>
+          <article class="card">
+            <b>Repo strategy</b>
+            <p>Work in the fork <code>songblaq/VisualKB</code>, keep <code>upstream</code> pointing at <code>VectifyAI/OpenKB</code>.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <h2>Local Artifacts</h2>
+          </div>
+          <p class="section-copy">The session produced both repo-local work and Codex-local skills. These paths document what exists now.</p>
+        </div>
+        <div class="path-list">
+          <div class="path"><b>This fork clone:</b> <code>C:\Users\Lucablaq\VisualKB</code></div>
+          <div class="path"><b>Remote fork:</b> <code>https://github.com/songblaq/VisualKB</code></div>
+          <div class="path"><b>Product brief draft:</b> <code>C:\Users\Lucablaq\Downloads\AMA\VisualKB\objects\visualkb-product-brief.html</code></div>
+          <div class="path"><b>Capture skill:</b> <code>C:\Users\Lucablaq\.codex\skills\visualkb-capture\SKILL.md</code></div>
+          <div class="path"><b>HTML docs skill:</b> <code>C:\Users\Lucablaq\.codex\skills\visualkb-html-docs\SKILL.md</code></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <h2>Implementation Direction</h2>
+          </div>
+          <p class="section-copy">The first engineering pass should be narrow: add an HTML output path without destroying the existing Markdown wiki path. The fork should remain easy to compare against upstream OpenKB.</p>
+        </div>
+        <pre>1. Add an HTML renderer beside the existing Markdown renderer.
+2. Define an HTML Knowledge Object schema: title, TL;DR, sections, sources, visuals, data refs.
+3. Add CLI target flags such as --target markdown, --target html, or --target both.
+4. Add visual components for comparison matrix, timeline, source strip, chart placeholder, and concept cards.
+5. Add lint checks for broken links, missing citations, missing alt text, and chart/data mismatches.
+6. Keep OpenKB compatibility until VisualKB has its own clear product surface.</pre>
+      </div>
+    </section>
+
+    <section>
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <h2>Sources</h2>
+          </div>
+          <div>
+            <p class="section-copy">External sources were used for orientation; local paths record artifacts generated in this workspace. Some product conclusions are explicitly session-derived interpretations.</p>
+            <div class="source-strip" aria-label="Sources and references">
+              <a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f">Karpathy LLM Wiki gist</a>
+              <a href="https://github.com/VectifyAI/OpenKB">VectifyAI/OpenKB</a>
+              <a href="https://github.com/songblaq/VisualKB">songblaq/VisualKB fork</a>
+              <span>Local Codex skills: visualkb-capture, visualkb-html-docs</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <p>Last updated: 2026-05-11. This file records the origin of the VisualKB fork and should be updated when the product direction changes.</p>
+    </div>
+  </footer>
+</body>
+</html>

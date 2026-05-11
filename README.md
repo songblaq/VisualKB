@@ -12,6 +12,8 @@
 
 ---
 
+> **VisualKB fork note:** this fork explores **LLM Wiki with HTML**: extending OpenKB-style compiled wikis from Markdown pages into renderable, inspectable, source-linked HTML Knowledge Objects. See [docs/visualkb-session-origin.html](docs/visualkb-session-origin.html) for the session origin, naming decisions, product intent, and first implementation direction.
+
 # 📑 What is OpenKB
 
 **OpenKB (Open Knowledge Base)** is an open-source system (in CLI) that compiles raw documents into a structured, interlinked wiki-style knowledge base using LLMs, powered by [**PageIndex**](https://github.com/VectifyAI/PageIndex) for vectorless long document retrieval.
