@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisualKB - OpenKB Architecture Notes</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #15171a;
+      --muted: #5b6472;
+      --line: #d9dee7;
+      --line-strong: #aeb8c7;
+      --blue: #2457d6;
+      --teal: #11856f;
+      --red: #b8453d;
+      --yellow: #f3c54b;
+      --code: #111722;
+      font-family: "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--bg); line-height: 1.62; }
+    a { color: var(--blue); text-underline-offset: 3px; overflow-wrap: anywhere; }
+    .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    header { padding: 48px 0 30px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #ffffff 0%, #f6f7f9 100%); }
+    h1, h2, h3 { margin: 0; line-height: 1.08; letter-spacing: 0; }
+    h1 { max-width: 940px; font-size: 72px; }
+    h2 { font-size: 42px; }
+    h3 { font-size: 20px; }
+    p { margin: 0; }
+    section { padding: 42px 0; border-bottom: 1px solid var(--line); }
+    .eyebrow { display: inline-block; margin-bottom: 14px; color: var(--blue); font-size: 12px; font-weight: 800; letter-spacing: 0; text-transform: uppercase; }
+    .tldr { max-width: 930px; margin-top: 18px; color: #343940; font-size: 21px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .chip { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; background: var(--panel); color: var(--muted); font-size: 13px; }
+    .section-head { display: grid; grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr); gap: 28px; margin-bottom: 22px; }
+    .section-copy, .muted { color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card { border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: var(--panel); min-width: 0; }
+    .card b { display: block; margin-bottom: 8px; font-size: 17px; }
+    .map { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; align-items: stretch; }
+    .node { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--panel); min-height: 146px; }
+    .node span { display: inline-block; margin-bottom: 8px; color: var(--teal); font-size: 12px; font-weight: 800; }
+    .matrix { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--line-strong); background: var(--panel); }
+    .matrix th, .matrix td { border-bottom: 1px solid var(--line); padding: 13px 14px; text-align: left; vertical-align: top; font-size: 14px; overflow-wrap: anywhere; word-break: break-word; }
+    .matrix th { color: #29303a; background: #eaf0ff; font-size: 12px; letter-spacing: 0; text-transform: uppercase; }
+    .matrix tr:last-child td { border-bottom: 0; }
+    code, pre { font-family: "Cascadia Mono", "Consolas", monospace; }
+    code { color: #17499f; overflow-wrap: anywhere; word-break: break-word; }
+    pre { overflow: auto; margin: 0; border-radius: 8px; padding: 18px; color: #f4f7fb; background: var(--code); font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
+    .source-strip { display: flex; flex-wrap: wrap; gap: 10px; }
+    .source { border-left: 4px solid var(--yellow); border-radius: 8px; padding: 12px 14px; background: var(--panel); color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
+    .risk { border-left: 4px solid var(--red); }
+    footer { padding: 30px 0 48px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 980px) {
+      h1 { font-size: 48px; }
+      h2 { font-size: 32px; }
+      .section-head, .grid, .two, .map { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 24px, 1180px); }
+      h1 { font-size: 38px; }
+      .tldr { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <div class="eyebrow">VisualKB Architecture Notes</div>
+      <h1>OpenKB Integration Notes</h1>
+      <p class="tldr">OpenKB is already organized around source conversion, LLM compilation, Markdown wiki pages, query tools, and linting. VisualKB should add HTML output as a parallel rendering target first, then deepen compiler prompts and query support after the artifact path is stable.</p>
+      <div class="meta" aria-label="Document metadata">
+        <span class="chip">Repository: songblaq/VisualKB</span>
+        <span class="chip">Base: VectifyAI/OpenKB</span>
+        <span class="chip">Updated: 2026-05-11</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="observed-architecture">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Observed Architecture</h2></div>
+          <p class="section-copy">The current codebase has a clean pipeline that can be extended without changing source ingestion first.</p>
+        </div>
+        <div class="map" aria-label="OpenKB module map">
+          <div class="node"><span>CLI</span><b>openkb/cli.py</b><p class="muted">Initializes KB folders, adds files, runs queries, updates logs, and stores hashes.</p></div>
+          <div class="node"><span>Conversion</span><b>openkb/converter.py</b><p class="muted">Copies originals to <code>raw/</code>, converts sources into <code>wiki/sources/</code>, and routes long PDFs through PageIndex.</p></div>
+          <div class="node"><span>Compilation</span><b>openkb/agent/compiler.py</b><p class="muted">Prompts the LLM for summaries, concepts, backlinks, and <code>wiki/index.md</code>.</p></div>
+          <div class="node"><span>Schema</span><b>openkb/schema.py</b><p class="muted">Defines <code>AGENTS.md</code>, page types, wiki conventions, and Markdown/wikilink expectations.</p></div>
+          <div class="node"><span>Query</span><b>openkb/agent/query.py</b><p class="muted">Uses tools to read index, wiki pages, source files, and images for answer generation.</p></div>
+          <div class="node"><span>Tools</span><b>openkb/agent/tools.py</b><p class="muted">Exposes read/write helpers scoped to the wiki root and supports image reading.</p></div>
+          <div class="node"><span>Lint</span><b>openkb/lint.py</b><p class="muted">Checks Markdown wiki structure: broken wikilinks, orphans, raw entries, and index sync.</p></div>
+          <div class="node"><span>Renderer</span><b>openkb/agent/_markdown.py</b><p class="muted">Renders Markdown in terminal output and already preserves inline/block HTML.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="current-output">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Current Output Contract</h2></div>
+          <p class="section-copy">OpenKB output is Markdown-first. VisualKB can reuse this contract as an intermediate representation in the first MVP.</p>
+        </div>
+        <table class="matrix">
+          <thead>
+            <tr><th>Output</th><th>Current location</th><th>VisualKB implication</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Converted source text</td><td><code>wiki/sources/{doc}.md</code> or long-doc JSON</td><td>HTML summaries should link back to the source text or PageIndex JSON.</td></tr>
+            <tr><td>Document summaries</td><td><code>wiki/summaries/{doc}.md</code></td><td>Render to <code>html/summaries/{doc}.html</code> with source strip and key facts.</td></tr>
+            <tr><td>Concept pages</td><td><code>wiki/concepts/{slug}.md</code></td><td>Render to <code>html/concepts/{slug}.html</code> with cross-links and source cards.</td></tr>
+            <tr><td>Saved explorations</td><td><code>wiki/explorations/*.md</code></td><td>Render to <code>html/explorations/*.html</code> after query saves.</td></tr>
+            <tr><td>Index</td><td><code>wiki/index.md</code></td><td>Create <code>html/index.html</code> as the visual KB entry point.</td></tr>
+            <tr><td>Lint reports</td><td><code>wiki/reports/</code></td><td>Add HTML reports or include HTML checks in existing report flow.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="extension-points">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Extension Points</h2></div>
+          <p class="section-copy">These are the practical places to add VisualKB behavior with limited blast radius.</p>
+        </div>
+        <div class="grid two">
+          <article class="card"><b>Config target</b><p class="muted">Add <code>targets</code> or <code>output_targets</code> to <code>.openkb/config.yaml</code>. Start with <code>markdown</code>, <code>html</code>, and <code>both</code>.</p></article>
+          <article class="card"><b>HTML renderer module</b><p class="muted">Create a renderer that reads compiled Markdown/frontmatter and writes standalone HTML objects.</p></article>
+          <article class="card"><b>Compiler prompt upgrade</b><p class="muted">Later, ask the LLM for structured sections and visual component hints instead of only Markdown content.</p></article>
+          <article class="card"><b>Index builder</b><p class="muted">Generate <code>html/index.html</code> from summaries, concepts, briefs, tags, and sources.</p></article>
+          <article class="card"><b>HTML lint</b><p class="muted">Add checks for broken links, missing alt text, missing source strips, unresolved data refs, and mobile overflow signals.</p></article>
+          <article class="card"><b>Query read path</b><p class="muted">Allow query tools to read HTML object text/metadata while retaining the existing Markdown wiki tools.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="implementation-sequence">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Suggested Sequence</h2></div>
+          <p class="section-copy">This order keeps the first version testable and avoids entangling ingestion, prompting, rendering, and query behavior all at once.</p>
+        </div>
+        <pre>1. Add config support for HTML targets.
+2. Add html/ directory creation during init.
+3. Implement a deterministic HTML renderer from existing wiki pages.
+4. Add render-html command for rebuilding without LLM calls.
+5. Wire add/query save paths to call the renderer when HTML is enabled.
+6. Add HTML lint checks.
+7. Add browser screenshot smoke tests for generated pages.
+8. Upgrade prompts to emit visual component hints after the renderer is stable.</pre>
+      </div>
+    </section>
+
+    <section id="tests">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Test Targets</h2></div>
+          <p class="section-copy">The existing test suite already covers CLI init, conversion, compiler writes, and lint behavior. VisualKB should add focused tests beside those patterns.</p>
+        </div>
+        <table class="matrix">
+          <thead>
+            <tr><th>Test area</th><th>Example assertion</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>CLI init</td><td><code>html/</code>, <code>html/summaries/</code>, <code>html/concepts/</code>, and <code>html/index.html</code> exist when HTML target is enabled.</td></tr>
+            <tr><td>Renderer unit tests</td><td>Markdown summary frontmatter becomes HTML title, TL;DR, source strip, body sections, and metadata script.</td></tr>
+            <tr><td>Compiler integration</td><td>After <code>add</code>, expected Markdown and HTML artifacts both exist when target is <code>both</code>.</td></tr>
+            <tr><td>HTML lint</td><td>Broken local links, missing source strip, and missing image alt text are reported.</td></tr>
+            <tr><td>Query integration</td><td>Saved explorations can be rendered as HTML without losing the answer text or sources.</td></tr>
+            <tr><td>Browser smoke</td><td>Generated pages render at desktop and mobile widths without horizontal overflow.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="risks">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Risks</h2></div>
+          <p class="section-copy">These are the main technical risks to manage during the MVP.</p>
+        </div>
+        <div class="grid">
+          <article class="card risk"><b>Prompt drift</b><p class="muted">If prompts ask for free-form HTML too early, output quality may vary. Start with deterministic rendering.</p></article>
+          <article class="card risk"><b>Source ambiguity</b><p class="muted">Visual components can imply precision. Require source-backed data or clear illustrative labels.</p></article>
+          <article class="card risk"><b>Two outputs can diverge</b><p class="muted">Markdown and HTML need sync checks or a single source of truth for metadata.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Sources</h2></div>
+          <p class="section-copy">These notes are based on local code inspection of the fork and the upstream OpenKB README model.</p>
+        </div>
+        <div class="source-strip">
+          <a class="source" href="../openkb/cli.py">Local: openkb/cli.py</a>
+          <a class="source" href="../openkb/converter.py">Local: openkb/converter.py</a>
+          <a class="source" href="../openkb/agent/compiler.py">Local: openkb/agent/compiler.py</a>
+          <a class="source" href="../openkb/schema.py">Local: openkb/schema.py</a>
+          <a class="source" href="../openkb/lint.py">Local: openkb/lint.py</a>
+          <a class="source" href="https://github.com/VectifyAI/OpenKB">Web: VectifyAI/OpenKB</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">Last updated: 2026-05-11. This document captures integration assumptions before code changes.</div>
+  </footer>
+
+  <script type="application/json" data-visualkb-schema>
+  {
+    "title": "OpenKB Integration Notes",
+    "object_type": "architecture-page",
+    "category": "LLM Wiki with HTML",
+    "updated_at": "2026-05-11",
+    "sources": [
+      "openkb/cli.py",
+      "openkb/converter.py",
+      "openkb/agent/compiler.py",
+      "openkb/schema.py",
+      "openkb/lint.py",
+      "https://github.com/VectifyAI/OpenKB"
+    ]
+  }
+  </script>
+</body>
+</html>

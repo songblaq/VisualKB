@@ -16,5 +16,5 @@ wiki/
 
 # Local only
 docs/*
-!docs/visualkb-session-origin.html
+!docs/*.html
 .claude/

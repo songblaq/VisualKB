@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisualKB - HTML Knowledge Object Schema</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #15171a;
+      --muted: #5b6472;
+      --line: #d9dee7;
+      --line-strong: #aeb8c7;
+      --blue: #2457d6;
+      --teal: #11856f;
+      --red: #b8453d;
+      --yellow: #f3c54b;
+      --code: #111722;
+      font-family: "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--bg); line-height: 1.62; }
+    a { color: var(--blue); text-underline-offset: 3px; overflow-wrap: anywhere; }
+    .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    header { padding: 48px 0 30px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #ffffff 0%, #f6f7f9 100%); }
+    h1, h2, h3 { margin: 0; line-height: 1.08; letter-spacing: 0; }
+    h1 { max-width: 920px; font-size: 72px; }
+    h2 { font-size: 42px; }
+    h3 { font-size: 20px; }
+    p { margin: 0; }
+    section { padding: 42px 0; border-bottom: 1px solid var(--line); }
+    .eyebrow { display: inline-block; margin-bottom: 14px; color: var(--blue); font-size: 12px; font-weight: 800; letter-spacing: 0; text-transform: uppercase; }
+    .tldr { max-width: 900px; margin-top: 18px; color: #343940; font-size: 21px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .chip { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; background: var(--panel); color: var(--muted); font-size: 13px; }
+    .section-head { display: grid; grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr); gap: 28px; margin-bottom: 22px; }
+    .section-copy, .muted { color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card { border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: var(--panel); min-width: 0; }
+    .card b { display: block; margin-bottom: 8px; font-size: 17px; }
+    .rule { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 12px; align-items: start; }
+    .dot { width: 10px; height: 10px; margin-top: 8px; border-radius: 50%; background: var(--teal); }
+    .matrix { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--line-strong); background: var(--panel); }
+    .matrix th, .matrix td { border-bottom: 1px solid var(--line); padding: 13px 14px; text-align: left; vertical-align: top; font-size: 14px; overflow-wrap: anywhere; word-break: break-word; }
+    .matrix th { color: #29303a; background: #eaf0ff; font-size: 12px; letter-spacing: 0; text-transform: uppercase; }
+    .matrix tr:last-child td { border-bottom: 0; }
+    code, pre { font-family: "Cascadia Mono", "Consolas", monospace; }
+    code { color: #17499f; overflow-wrap: anywhere; word-break: break-word; }
+    pre { overflow: auto; margin: 0; border-radius: 8px; padding: 18px; color: #f4f7fb; background: var(--code); font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
+    .source-strip { display: flex; flex-wrap: wrap; gap: 10px; }
+    .source { border-left: 4px solid var(--yellow); border-radius: 8px; padding: 12px 14px; background: var(--panel); color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
+    .example-object { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 16px; align-items: stretch; }
+    .mock { border: 1px solid var(--line-strong); border-radius: 8px; background: var(--panel); overflow: hidden; }
+    .mock-head { padding: 14px 16px; color: #ffffff; background: #22324a; }
+    .mock-body { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px; }
+    .mock-tile { min-height: 88px; border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #f9fbfd; }
+    footer { padding: 30px 0 48px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 900px) {
+      h1 { font-size: 48px; }
+      h2 { font-size: 32px; }
+      .section-head, .grid, .two, .example-object { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 24px, 1180px); }
+      h1 { font-size: 38px; }
+      .tldr { font-size: 18px; }
+      .mock-body { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <div class="eyebrow">VisualKB Schema</div>
+      <h1>HTML Knowledge Object Schema</h1>
+      <p class="tldr">An HTML Knowledge Object is the durable VisualKB artifact: a renderable page that stores text, source links, visual components, accessible descriptions, and optional backing data in one inspectable structure.</p>
+      <div class="meta" aria-label="Document metadata">
+        <span class="chip">Category: LLM Wiki with HTML</span>
+        <span class="chip">Artifact: Static HTML</span>
+        <span class="chip">Updated: 2026-05-11</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="context">
+      <div class="shell section-head">
+        <div><h2>Context</h2></div>
+        <p class="section-copy">OpenKB compiles raw documents into Markdown summaries and concept pages. VisualKB keeps that source-linked wiki idea, but adds an HTML artifact layer so knowledge can be read as prose, inspected as DOM, rendered as visual layout, and checked as a screenshot.</p>
+      </div>
+    </section>
+
+    <section id="required-fields">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Required Fields</h2></div>
+          <p class="section-copy">Every object should be useful when opened directly in a browser and when read by an LLM through raw text or DOM extraction.</p>
+        </div>
+        <table class="matrix">
+          <thead>
+            <tr><th>Field</th><th>Meaning</th><th>HTML representation</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>title</code></td><td>Human-readable object name.</td><td><code>&lt;title&gt;</code>, <code>&lt;h1&gt;</code>, and optional JSON metadata.</td></tr>
+            <tr><td><code>tldr</code></td><td>One-paragraph summary that preserves the origin idea.</td><td>Lead paragraph near the top of the page.</td></tr>
+            <tr><td><code>object_type</code></td><td>Concept, summary, comparison, data, code, image, architecture, or exploration.</td><td>Visible metadata chip and machine-readable metadata.</td></tr>
+            <tr><td><code>sources</code></td><td>Source files, URLs, local paths, or generated-source notes.</td><td>Source strip with links, labels, retrieval date, and source type.</td></tr>
+            <tr><td><code>sections</code></td><td>Structured body content.</td><td>Semantic <code>&lt;section&gt;</code> blocks with stable anchors.</td></tr>
+            <tr><td><code>visuals</code></td><td>Knowledge components such as charts, matrices, timelines, diagrams, and figure callouts.</td><td>Tables, SVG, HTML/CSS components, or data-backed charts.</td></tr>
+            <tr><td><code>data_refs</code></td><td>Backing CSV/JSON for charts and tables.</td><td>Relative links to <code>html/data/</code> or KB-level <code>data/</code>.</td></tr>
+            <tr><td><code>accessibility_text</code></td><td>Text equivalent for visual structures.</td><td><code>aria-label</code>, captions, table headers, alt text, and visible summaries.</td></tr>
+            <tr><td><code>updated_at</code></td><td>Last compile or manual update date.</td><td>Footer and JSON metadata.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="object-types">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Object Types</h2></div>
+          <p class="section-copy">The compiler should choose an object type based on the knowledge task, not on the visual style alone.</p>
+        </div>
+        <div class="grid">
+          <article class="card"><b>concept-page</b><p class="muted">A durable explanation of one idea, similar to an OpenKB concept page but with visual structure.</p></article>
+          <article class="card"><b>summary-page</b><p class="muted">A source-specific digest of one document, equivalent to summaries with source cards and figures.</p></article>
+          <article class="card"><b>comparison-page</b><p class="muted">Alternatives, models, libraries, APIs, products, or decisions compared in a matrix.</p></article>
+          <article class="card"><b>data-page</b><p class="muted">CSV/JSON-heavy material with charts, tables, and backing data references.</p></article>
+          <article class="card"><b>code-page</b><p class="muted">Repository architecture, call flow, module map, implementation notes, or API contracts.</p></article>
+          <article class="card"><b>image-page</b><p class="muted">Screenshots, diagrams, figures, annotated images, and multimodal evidence.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="layout">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>File Layout</h2></div>
+          <p class="section-copy">For the MVP, the HTML layer should sit beside the existing Markdown wiki. This keeps OpenKB compatibility while making VisualKB output easy to test.</p>
+        </div>
+        <pre>kb-root/
+|-- raw/
+|-- wiki/
+|   |-- sources/
+|   |-- summaries/
+|   |-- concepts/
+|   `-- index.md
+|-- html/
+|   |-- index.html
+|   |-- summaries/
+|   |-- concepts/
+|   |-- explorations/
+|   |-- assets/
+|   `-- data/
+`-- .openkb/</pre>
+      </div>
+    </section>
+
+    <section id="component-contract">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Component Contract</h2></div>
+          <p class="section-copy">Visual elements should carry knowledge, not decoration. Each component needs a plain-language equivalent so the object remains readable without pixels.</p>
+        </div>
+        <div class="example-object">
+          <div class="mock" aria-label="Example HTML Knowledge Object layout">
+            <div class="mock-head">HTML Knowledge Object</div>
+            <div class="mock-body">
+              <div class="mock-tile"><b>TL;DR</b><p class="muted">Origin and purpose in one paragraph.</p></div>
+              <div class="mock-tile"><b>Source Strip</b><p class="muted">Local files, URLs, and inference markers.</p></div>
+              <div class="mock-tile"><b>Visual Component</b><p class="muted">Matrix, timeline, chart, or map.</p></div>
+              <div class="mock-tile"><b>Open Questions</b><p class="muted">Limits, missing sources, and decisions.</p></div>
+            </div>
+          </div>
+          <pre>&lt;article class="knowledge-object" data-object-type="concept-page"&gt;
+  &lt;header&gt;
+    &lt;h1&gt;VisualKB&lt;/h1&gt;
+    &lt;p class="tldr"&gt;...&lt;/p&gt;
+  &lt;/header&gt;
+  &lt;section id="sources" aria-label="Sources"&gt;...&lt;/section&gt;
+  &lt;section id="visual-model" aria-label="Visual model"&gt;...&lt;/section&gt;
+  &lt;script type="application/json" data-visualkb-schema&gt;{ ... }&lt;/script&gt;
+&lt;/article&gt;</pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="validation">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Validation Rules</h2></div>
+          <p class="section-copy">HTML objects need a lint path separate from Markdown wikilink checks.</p>
+        </div>
+        <div class="grid two">
+          <article class="card rule"><span class="dot"></span><div><b>Source integrity</b><p class="muted">Every factual section should link to sources or be explicitly marked as inference.</p></div></article>
+          <article class="card rule"><span class="dot"></span><div><b>Path integrity</b><p class="muted">Local links, image paths, CSS assets, and data references must resolve.</p></div></article>
+          <article class="card rule"><span class="dot"></span><div><b>Visual integrity</b><p class="muted">Charts and tables must match their backing data or state that they are illustrative.</p></div></article>
+          <article class="card rule"><span class="dot"></span><div><b>Accessibility</b><p class="muted">Images and visual components need alt text, labels, captions, or text summaries.</p></div></article>
+          <article class="card rule"><span class="dot"></span><div><b>Responsive layout</b><p class="muted">No overlapping text, clipped headings, or horizontal overflow on mobile.</p></div></article>
+          <article class="card rule"><span class="dot"></span><div><b>LLM readability</b><p class="muted">The page should be useful through raw text and DOM inspection, not only as pixels.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Sources</h2></div>
+          <p class="section-copy">This schema is based on the VisualKB session notes and the inspected OpenKB repository structure.</p>
+        </div>
+        <div class="source-strip">
+          <a class="source" href="visualkb-session-origin.html">Local: VisualKB session origin</a>
+          <a class="source" href="../openkb/agent/compiler.py">Local: OpenKB compiler module</a>
+          <a class="source" href="../openkb/schema.py">Local: OpenKB wiki schema</a>
+          <a class="source" href="https://github.com/VectifyAI/OpenKB">Web: VectifyAI/OpenKB</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">Last updated: 2026-05-11. This is a planning schema for the VisualKB MVP and may change during implementation.</div>
+  </footer>
+
+  <script type="application/json" data-visualkb-schema>
+  {
+    "title": "HTML Knowledge Object Schema",
+    "object_type": "schema-page",
+    "category": "LLM Wiki with HTML",
+    "updated_at": "2026-05-11",
+    "sources": [
+      "docs/visualkb-session-origin.html",
+      "openkb/agent/compiler.py",
+      "openkb/schema.py",
+      "https://github.com/VectifyAI/OpenKB"
+    ]
+  }
+  </script>
+</body>
+</html>

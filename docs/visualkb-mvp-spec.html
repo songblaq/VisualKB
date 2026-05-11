@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisualKB - MVP Spec</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #15171a;
+      --muted: #5b6472;
+      --line: #d9dee7;
+      --line-strong: #aeb8c7;
+      --blue: #2457d6;
+      --teal: #11856f;
+      --red: #b8453d;
+      --yellow: #f3c54b;
+      --code: #111722;
+      font-family: "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--bg); line-height: 1.62; }
+    a { color: var(--blue); text-underline-offset: 3px; overflow-wrap: anywhere; }
+    .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    header { padding: 48px 0 30px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #ffffff 0%, #f6f7f9 100%); }
+    h1, h2, h3 { margin: 0; line-height: 1.08; letter-spacing: 0; }
+    h1 { max-width: 930px; font-size: 72px; }
+    h2 { font-size: 42px; }
+    h3 { font-size: 20px; }
+    p { margin: 0; }
+    section { padding: 42px 0; border-bottom: 1px solid var(--line); }
+    .eyebrow { display: inline-block; margin-bottom: 14px; color: var(--blue); font-size: 12px; font-weight: 800; letter-spacing: 0; text-transform: uppercase; }
+    .tldr { max-width: 900px; margin-top: 18px; color: #343940; font-size: 21px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .chip { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; background: var(--panel); color: var(--muted); font-size: 13px; }
+    .section-head { display: grid; grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr); gap: 28px; margin-bottom: 22px; }
+    .section-copy, .muted { color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card { border: 1px solid var(--line); border-radius: 8px; padding: 18px; background: var(--panel); min-width: 0; }
+    .card b { display: block; margin-bottom: 8px; font-size: 17px; }
+    .metric { border-top: 4px solid var(--teal); min-height: 138px; }
+    .metric strong { display: block; margin-bottom: 8px; font-size: 28px; line-height: 1; color: var(--teal); }
+    .matrix { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid var(--line-strong); background: var(--panel); }
+    .matrix th, .matrix td { border-bottom: 1px solid var(--line); padding: 13px 14px; text-align: left; vertical-align: top; font-size: 14px; overflow-wrap: anywhere; word-break: break-word; }
+    .matrix th { color: #29303a; background: #eaf0ff; font-size: 12px; letter-spacing: 0; text-transform: uppercase; }
+    .matrix tr:last-child td { border-bottom: 0; }
+    .flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; align-items: stretch; }
+    .flow-step { position: relative; border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--panel); min-height: 134px; }
+    .flow-step span { display: block; margin-bottom: 8px; color: var(--blue); font-size: 12px; font-weight: 800; }
+    .timeline { display: grid; gap: 12px; }
+    .phase { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: start; }
+    .phase-label { border-radius: 8px; padding: 10px 12px; color: #ffffff; background: #22324a; font-weight: 800; }
+    .phase-body { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--panel); }
+    code, pre { font-family: "Cascadia Mono", "Consolas", monospace; }
+    code { color: #17499f; overflow-wrap: anywhere; word-break: break-word; }
+    pre { overflow: auto; margin: 0; border-radius: 8px; padding: 18px; color: #f4f7fb; background: var(--code); font-size: 13px; line-height: 1.55; white-space: pre-wrap; }
+    .source-strip { display: flex; flex-wrap: wrap; gap: 10px; }
+    .source { border-left: 4px solid var(--yellow); border-radius: 8px; padding: 12px 14px; background: var(--panel); color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
+    .warn { border-left: 4px solid var(--red); }
+    footer { padding: 30px 0 48px; color: var(--muted); font-size: 13px; }
+    @media (max-width: 980px) {
+      h1 { font-size: 48px; }
+      h2 { font-size: 32px; }
+      .section-head, .grid, .two, .flow, .phase { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 24px, 1180px); }
+      h1 { font-size: 38px; }
+      .tldr { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <div class="eyebrow">VisualKB Product Spec</div>
+      <h1>VisualKB MVP Spec</h1>
+      <p class="tldr">VisualKB is an LLM Wiki with HTML: it keeps OpenKB's compiled, source-linked wiki model, then adds renderable HTML Knowledge Objects so complex knowledge can be stored as text, DOM, tables, charts, timelines, diagrams, and screenshots.</p>
+      <div class="meta" aria-label="Document metadata">
+        <span class="chip">Product name: VisualKB</span>
+        <span class="chip">Category: LLM Wiki with HTML</span>
+        <span class="chip">MVP target: HTML alongside Markdown</span>
+        <span class="chip">Updated: 2026-05-11</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="context">
+      <div class="shell section-head">
+        <div><h2>Context</h2></div>
+        <p class="section-copy">Karpathy's LLM Wiki idea and OpenKB both point toward compiled knowledge that accumulates over time. The VisualKB fork starts from that base, but treats Markdown as only one representation. The product bet is that HTML is a better artifact when the knowledge includes charts, visual comparisons, architecture maps, screenshots, and multimodal evidence.</p>
+      </div>
+    </section>
+
+    <section id="mvp-goals">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>MVP Goals</h2></div>
+          <p class="section-copy">The first version should prove the HTML artifact loop without breaking the existing OpenKB workflow.</p>
+        </div>
+        <div class="grid">
+          <article class="card metric"><strong>1</strong><b>Compile HTML objects</b><p class="muted">Generate static HTML pages for summaries, concepts, and saved explorations.</p></article>
+          <article class="card metric"><strong>2</strong><b>Keep source traceability</b><p class="muted">Preserve source files, page paths, citations, and inference markers in each object.</p></article>
+          <article class="card metric"><strong>3</strong><b>Use visual knowledge components</b><p class="muted">Support matrices, timelines, flow diagrams, source strips, and data-backed tables.</p></article>
+          <article class="card metric"><strong>4</strong><b>Stay compatible</b><p class="muted">Leave Markdown wiki generation intact while adding HTML as a target.</p></article>
+          <article class="card metric"><strong>5</strong><b>Render and lint</b><p class="muted">Validate links, alt text, data references, responsive layout, and missing citations.</p></article>
+          <article class="card metric"><strong>6</strong><b>Make it inspectable by LLMs</b><p class="muted">Keep visible text, semantic sections, and optional JSON metadata inside the page.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Target Flow</h2></div>
+          <p class="section-copy">VisualKB should reuse OpenKB's ingestion and concept compilation first, then add an HTML rendering pass. This limits risk and keeps upstream OpenKB behavior available.</p>
+        </div>
+        <div class="flow" aria-label="VisualKB target flow">
+          <div class="flow-step"><span>01</span><b>Raw source</b><p class="muted">PDF, docs, Markdown, web pages, tables, images, and local files.</p></div>
+          <div class="flow-step"><span>02</span><b>Convert/index</b><p class="muted">MarkItDown or PageIndex creates source text, images, and long-doc summaries.</p></div>
+          <div class="flow-step"><span>03</span><b>Compile wiki</b><p class="muted">LLM creates summaries, concepts, backlinks, and index records.</p></div>
+          <div class="flow-step"><span>04</span><b>Render HTML</b><p class="muted">VisualKB renderer maps wiki objects into HTML Knowledge Objects.</p></div>
+          <div class="flow-step"><span>05</span><b>Validate</b><p class="muted">HTML lint plus screenshot checks catch broken links and layout failures.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cli">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>CLI Surface</h2></div>
+          <p class="section-copy">The smallest product surface is a target flag and config entry. The default can remain Markdown until the fork is ready to switch defaults.</p>
+        </div>
+        <table class="matrix">
+          <thead>
+            <tr><th>Command or config</th><th>Behavior</th><th>MVP note</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>openkb init --target both</code></td><td>Create <code>wiki/</code> and <code>html/</code> trees.</td><td>Interactive init can ask later; flag is enough for first pass.</td></tr>
+            <tr><td><code>openkb add file.pdf --target html</code></td><td>Compile source, then render HTML summary/concept pages.</td><td>Use existing Markdown compiler output as intermediate in MVP.</td></tr>
+            <tr><td><code>openkb render-html</code></td><td>Rebuild HTML from the current wiki without re-ingesting sources.</td><td>Useful for template iteration and regression tests.</td></tr>
+            <tr><td><code>openkb lint --target html</code></td><td>Run path, source, accessibility, and layout checks.</td><td>Markdown lint remains separate.</td></tr>
+            <tr><td><code>.openkb/config.yaml</code></td><td><code>targets: ["markdown", "html"]</code></td><td>Use list form so future targets can be added.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="file-layout">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>File Layout</h2></div>
+          <p class="section-copy">The HTML output tree should be portable and static. No build step is required for reading the KB.</p>
+        </div>
+        <pre>my-kb/
+|-- raw/
+|-- wiki/
+|   |-- sources/
+|   |-- summaries/
+|   |-- concepts/
+|   `-- index.md
+|-- html/
+|   |-- index.html
+|   |-- summaries/
+|   |   `-- source-name.html
+|   |-- concepts/
+|   |   `-- concept-name.html
+|   |-- explorations/
+|   |-- assets/
+|   |-- data/
+|   `-- snapshots/
+`-- .openkb/
+    |-- config.yaml
+    `-- hashes.json</pre>
+      </div>
+    </section>
+
+    <section id="phases">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Implementation Phases</h2></div>
+          <p class="section-copy">The first implementation should ship in small, verifiable layers rather than rewriting OpenKB's compiler.</p>
+        </div>
+        <div class="timeline">
+          <div class="phase"><div class="phase-label">Phase 0</div><div class="phase-body"><b>Docs and fork intent</b><p class="muted">Record origin, object schema, MVP scope, and OpenKB integration notes.</p></div></div>
+          <div class="phase"><div class="phase-label">Phase 1</div><div class="phase-body"><b>Static renderer</b><p class="muted">Build a renderer that converts existing Markdown summaries and concepts into HTML objects with source strips.</p></div></div>
+          <div class="phase"><div class="phase-label">Phase 2</div><div class="phase-body"><b>Compiler prompts</b><p class="muted">Add HTML-aware prompt contracts that can request structured sections and visual component hints.</p></div></div>
+          <div class="phase"><div class="phase-label">Phase 3</div><div class="phase-body"><b>HTML lint and screenshots</b><p class="muted">Check links, alt text, missing source strips, data references, and responsive rendering.</p></div></div>
+          <div class="phase"><div class="phase-label">Phase 4</div><div class="phase-body"><b>Query integration</b><p class="muted">Let the agent read HTML objects as DOM/text and optionally inspect screenshots or extracted images.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="non-goals">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Non-Goals</h2></div>
+          <p class="section-copy">These are intentionally out of scope for the MVP so the first product loop stays small.</p>
+        </div>
+        <div class="grid">
+          <article class="card warn"><b>No full web app yet</b><p class="muted">Static HTML is enough to test the knowledge artifact model.</p></article>
+          <article class="card warn"><b>No Markdown removal</b><p class="muted">Markdown stays as the compatibility layer until HTML output is proven.</p></article>
+          <article class="card warn"><b>No fake dashboards</b><p class="muted">Charts and metrics must be source-backed or clearly labeled as illustrative.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="acceptance">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Acceptance Checks</h2></div>
+          <p class="section-copy">The MVP is real when it can produce and validate a small HTML KB from source files.</p>
+        </div>
+        <table class="matrix">
+          <thead>
+            <tr><th>Check</th><th>Expected result</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Initialize a KB with HTML target</td><td><code>html/</code> directories and an HTML index are created.</td></tr>
+            <tr><td>Add a short document</td><td>Markdown summary/concepts and HTML summary/concept objects are produced.</td></tr>
+            <tr><td>Add a long PDF</td><td>PageIndex output still works; HTML summary links to source JSON and extracted figures.</td></tr>
+            <tr><td>Run HTML lint</td><td>Broken links, missing source strips, missing alt text, and data reference issues are reported.</td></tr>
+            <tr><td>Render with a browser</td><td>Desktop and mobile screenshots show readable, non-overlapping content.</td></tr>
+            <tr><td>Ask a query</td><td>The agent can use existing wiki content and reference HTML artifacts where available.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="sources">
+      <div class="shell">
+        <div class="section-head">
+          <div><h2>Sources</h2></div>
+          <p class="section-copy">This spec is based on the local VisualKB session and the inspected OpenKB fork.</p>
+        </div>
+        <div class="source-strip">
+          <a class="source" href="visualkb-session-origin.html">Local: VisualKB session origin</a>
+          <a class="source" href="html-knowledge-object-schema.html">Local: HTML Knowledge Object schema</a>
+          <a class="source" href="openkb-architecture-notes.html">Local: OpenKB architecture notes</a>
+          <a class="source" href="https://github.com/VectifyAI/OpenKB">Web: VectifyAI/OpenKB</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">Last updated: 2026-05-11. Phase 0 planning document for the songblaq/VisualKB fork.</div>
+  </footer>
+
+  <script type="application/json" data-visualkb-schema>
+  {
+    "title": "VisualKB MVP Spec",
+    "object_type": "product-spec",
+    "category": "LLM Wiki with HTML",
+    "updated_at": "2026-05-11",
+    "targets": ["markdown", "html"],
+    "sources": [
+      "docs/visualkb-session-origin.html",
+      "docs/html-knowledge-object-schema.html",
+      "docs/openkb-architecture-notes.html",
+      "https://github.com/VectifyAI/OpenKB"
+    ]
+  }
+  </script>
+</body>
+</html>

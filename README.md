@@ -12,7 +12,7 @@
 
 ---
 
-> **VisualKB fork note:** this fork explores **LLM Wiki with HTML**: extending OpenKB-style compiled wikis from Markdown pages into renderable, inspectable, source-linked HTML Knowledge Objects. See [docs/visualkb-session-origin.html](docs/visualkb-session-origin.html) for the session origin, naming decisions, product intent, and first implementation direction.
+> **VisualKB fork note:** this fork explores **LLM Wiki with HTML**: extending OpenKB-style compiled wikis from Markdown pages into renderable, inspectable, source-linked HTML Knowledge Objects. See [docs/visualkb-session-origin.html](docs/visualkb-session-origin.html) for the session origin, [docs/visualkb-mvp-spec.html](docs/visualkb-mvp-spec.html) for the MVP plan, [docs/html-knowledge-object-schema.html](docs/html-knowledge-object-schema.html) for the object schema, and [docs/openkb-architecture-notes.html](docs/openkb-architecture-notes.html) for OpenKB integration notes.
 
 # 📑 What is OpenKB
 
